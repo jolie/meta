@@ -1,0 +1,15 @@
+{
+	"name": "@jolie/meta",
+	"description": "The metamodel of the Jolie progamming language",
+	"author": {
+		"name": "Fabrizio Montesi",
+		"email": "famontesi@gmail.com",
+		"url": "https://www.fabriziomontesi.com/"
+	},
+	"version": "1.10.1",
+	"license": "LGPL 2.1",
+	"keywords": ["jolie", "microservices"],
+	"dependencies": {
+		"npm": {}
+	}
+}
