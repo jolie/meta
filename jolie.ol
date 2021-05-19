@@ -89,9 +89,13 @@ Note by FM: abstract types that cannot be instantiated do not
 make much sense in Jolie, because values do not have runtime type information.
 */
 
+// -----
+// Types
+// -----
+
 type TypeDefinition {
 	id: Identifier
-	expression: TypeExpression
+	expression: Type
 }
 
 /* Note by FM:
@@ -105,16 +109,34 @@ The idea of a tagged union is that it injects a field
 with the name of the type itself and type "void", which hopefully does not introduce problems.
 Otherwise, we leave it to the programmer to use union manually.
 */
-type TypeExpression:
+type Type:
 	ReferenceType //< reference to another type
 	+ RecordType
-	+ UnionTypeExpression
-	+ MergeTypeExpression
+	+ UnionType
+	+ MergeType
+	+ MapType
+
+type ReferenceType: Identifier
+
+type MapType< K, V > {
+	keyType: K
+	valueType: V
+}
 
 type RecordType {
 	basicType: BasicType
-	fields = map<string, TypeExpression> // not sure how to write this yet. we probably wanna be inspired by typescript's dictionaries.
+	fields: Map< string, TypeExpression > // not sure how to write this yet. we probably wanna be inspired by typescript's dictionaries.
 }
+
+type BasicType {
+	primitiveType: PrimitiveType
+	refinement?: TypeRefinement
+}
+
+type PrimitiveType: VoidType + BoolType + IntType + DoubleType + StringType + AnyType
+
+// mmh, actually the type refinement depends on the primitive type used in the basic type
+type TypeRefinement: void
 
 type BinaryTypeExpression {
 	left: TypeExpression
@@ -132,7 +154,7 @@ type Service: SyntaxNode ext {
 	inputPorts*: InputPort
 	outputPorts*: OutputPort
 	embedStatements*: EmbedStatements
-	definitions: map<string, Behaviour>
+	definitions: Map< string, Behaviour >
 	main: Behaviour
 }
 
@@ -140,9 +162,13 @@ type Behaviour:
 	WhileLoop
 	+ ForLoop
 
-type WhileLoop: SyntaxNode & {
+type WhileLoop ext SyntaxNode {
 	condition: Condition
 	body: SyntaxNode
+}
+
+type ForLoop {
+
 }
 
 // ----------
@@ -159,10 +185,9 @@ type Condition extends SyntaxNode
 // Variable Paths
 // --------------
 
-// TODO: not sure about the name "elements". In the Java impl it's unnamed.
 type VariablePath {
-	elements+ {
-		name: Expression
+	items+ {
+		id: Expression
 		index: Expression
 	}
 }
@@ -176,21 +201,16 @@ type VariablePath {
 // the different cases from the different structures (they are not all different).
 // Strong suggestion that we need sum types.
 
-type Condition: open void
+type Condition:
+	AndCondition
+	+ OrCondition
+	+ NotCondition
+	+ 
 
 type AndCondition: Condition & {
-	children*: Condition
+	items*: Condition
 }
 
 type OrCondition: Condition & {
-	children*: Condition
-}
-
-// -----
-// Types
-// -----
-
-// TODO: Should we express here that it is an ImportableSymbol? See Java implementation.
-type TypeDefinition {
-	name: string
+	items*: Condition
 }
