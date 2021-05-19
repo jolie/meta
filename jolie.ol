@@ -60,8 +60,8 @@ type ImportStatementAllSymbols: ImportStatementBase ext {
 }
 
 type ImportStatement:
-	ImportStatementSomeSymbols
-	| ImportStatementAllSymbols
+	| Some ImportStatementSomeSymbols
+	| All ImportStatementAllSymbols
 
 /*
 Note by FM: On intersection types to make sealed type cases.
@@ -116,6 +116,56 @@ type Type:
 	+ MergeType
 	+ MapType
 
+// + as syntactic sugar for | and ext
+type Type:
+	ReferenceType //< reference to another type
+	| ( RecordType ext { RecordType: void } )
+	| ( UnionType ext { UnionType: void } )
+	+ MergeType
+	+ MapType
+
+type Type:
+	| reference ReferenceType
+	| record RecordType
+
+// + as usual, with inl and inr
+/// @java Type
+type Type:
+	{ case0: ReferenceType } //< @java ReferenceType
+	| { case1: RecordType }
+	| { case2: UnionType }
+	| { case3: MergeType }
+	| { case4: MapType }
+
+/*
+	class Type { ... }
+
+	class ReferenceType extends Type { ... }
+*/
+
+type Tree T:
+	| Leaf
+	| Node T T
+
+type T: A | B
+
+type BinaryType {
+	left: Type
+	right: Type
+}
+
+type MergeType {
+	left: Type
+	right: Type
+}
+
+type UnionType {
+	left: Type
+	right: Type
+}
+
+type ProductType: BinaryType
+
 type ReferenceType: Identifier
 
 type MapType< K, V > {
@@ -137,11 +187,6 @@ type PrimitiveType: VoidType + BoolType + IntType + DoubleType + StringType + An
 
 // mmh, actually the type refinement depends on the primitive type used in the basic type
 type TypeRefinement: void
-
-type BinaryTypeExpression {
-	left: TypeExpression
-	right: TypeExpression
-}
 
 /*
 Note by FM: here comes the disjointness problem again, see the following two types.
@@ -214,3 +259,5 @@ type AndCondition: Condition & {
 type OrCondition: Condition & {
 	items*: Condition
 }
+
+type NotCondition
